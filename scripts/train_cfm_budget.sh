@@ -7,6 +7,11 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$REPO_ROOT"
+export PYTHONPATH="$REPO_ROOT${PYTHONPATH:+:$PYTHONPATH}"
+
 # 4  = OfflineCarGoal1Gymnasium-v0
 # 12 = OfflinePointGoal1Gymnasium-v0
 ENV_IDS=(0 4)
@@ -16,7 +21,6 @@ SEEDS=($RANDOM)
 
 for ENV_ID in "${ENV_IDS[@]}"; do
     ENV_NAME=$(python -c "
-import sys; sys.path.append('.')
 from env.env_list import env_list
 print(env_list[$ENV_ID])")
     GROUP="${ENV_NAME}_cfm_budget_awr_cfm_budget_qc_N8_minqc"

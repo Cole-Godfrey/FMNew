@@ -7,6 +7,12 @@
 #   bash scripts/sweep_cfm_alpha.sh
 
 set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$REPO_ROOT"
+export PYTHONPATH="$REPO_ROOT${PYTHONPATH:+:$PYTHONPATH}"
+
 ENV_IDS=(4 6)
 CONFIG="configs/train_config.py:safe_flow_q_cfm"
 DATE=$(date +%Y-%m-%d)
@@ -15,7 +21,6 @@ ALPHAS=(0.5)
 
 for ENV_ID in "${ENV_IDS[@]}"; do
     ENV_NAME=$(python -c "
-import sys; sys.path.append('.')
 from env.env_list import env_list
 print(env_list[$ENV_ID])")
 
