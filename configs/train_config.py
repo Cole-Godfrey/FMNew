@@ -255,7 +255,7 @@ def get_config(config_string):
                     noise_samples=10,
                     q_conservative_alpha=0.5,
                     y_norm_clip=5.0,
-                    bc_coef_unsafe=0.0,
+                    bc_coef_unsafe=3.0,
                     unsafe_flow_weight=1.0,
                     value_expectile=0.9,
                     safety_penalty=2.0,
