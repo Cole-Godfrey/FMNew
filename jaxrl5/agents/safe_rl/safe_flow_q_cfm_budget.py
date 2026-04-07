@@ -62,7 +62,8 @@ def classify_budget(u, c, qc, cost_limit, qc_threshold):
     Returns:
         category (int32, shape: B): 0=safe, 2=unsafe
     """
-    is_unsafe = (u + c >= cost_limit) | (qc >= qc_threshold)
+    # is_unsafe = (u + c >= cost_limit) | (qc >= qc_threshold)
+    is_unsafe = (qc >= qc_threshold)
     return jnp.where(is_unsafe, 2, 0).astype(jnp.int32)
 
 
@@ -525,7 +526,7 @@ class SafeFlowQCFMBudget(Agent):
         unsafe_mask = category_exp == 2
         r_tilde_exp = jnp.where(
             safe_mask, rewards_exp,
-            jnp.where(unsafe_mask, -100* costs_exp, rewards_exp - lam_exp * costs_exp)
+            jnp.where(unsafe_mask, -agent.safety_penalty, rewards_exp - lam_exp * costs_exp)
         )
 
         # u_next = clip(u + c, 0, cost_limit) for bootstrap
