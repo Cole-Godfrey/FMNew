@@ -43,6 +43,16 @@ def _make_metadrive_env(env_name: str) -> Any:
 
     try:
         return gym.make(env_name)
+    except ModuleNotFoundError as exc:
+        if exc.name == "metadrive":
+            raise ModuleNotFoundError(
+                "MetaDrive support is not installed in the current Python environment. "
+                "Install it with:\n"
+                "  python -m pip install git+https://github.com/HenryLHH/metadrive_clean.git@main\n"
+                "If you manage DSRL from source, you can instead install its extra with:\n"
+                "  python -m pip install -e .[metadrive]"
+            ) from exc
+        raise
     except Exception as exc:
         raise RuntimeError(
             f"Failed to create MetaDrive environment `{env_name}`. "
