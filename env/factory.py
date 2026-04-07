@@ -13,6 +13,14 @@ def is_point_robot_env(env_name: str) -> bool:
     return env_name == POINT_ROBOT_NAME
 
 
+def _patch_legacy_gym_numpy_compat() -> None:
+    # gym<=0.26 still references np.bool8, which was removed in NumPy 2.
+    import numpy as np
+
+    if not hasattr(np, "bool8"):
+        np.bool8 = np.bool_
+
+
 def make_env(env_name: str) -> Any:
     if is_metadrive_env(env_name):
         return _make_metadrive_env(env_name)
@@ -23,6 +31,8 @@ def make_env(env_name: str) -> Any:
 
 
 def _make_metadrive_env(env_name: str) -> Any:
+    _patch_legacy_gym_numpy_compat()
+
     try:
         import gym
     except ImportError as exc:
@@ -42,6 +52,8 @@ def _make_metadrive_env(env_name: str) -> Any:
         ) from exc
 
     try:
+        return gym.make(env_name, disable_env_checker=True)
+    except TypeError:
         return gym.make(env_name)
     except ModuleNotFoundError as exc:
         if exc.name == "metadrive":
