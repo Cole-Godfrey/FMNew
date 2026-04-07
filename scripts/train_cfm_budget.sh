@@ -1,5 +1,5 @@
 #!/bin/bash
-# Train SafeFlowQCFMBudget on Goal1 environments
+# Train SafeFlowQCFMBudget on selected environments
 #
 # Usage:
 #   cd /home/jerry/Desktop/SafeFlowQ
@@ -14,7 +14,9 @@ export PYTHONPATH="$REPO_ROOT${PYTHONPATH:+:$PYTHONPATH}"
 
 # 4  = OfflineCarGoal1Gymnasium-v0
 # 12 = OfflinePointGoal1Gymnasium-v0
-ENV_IDS=(0 4)
+# 30 = OfflineMetadrive-easysparse-v0
+# 38 = OfflineMetadrive-harddense-v0
+ENV_IDS=(30)
 CONFIG="configs/train_config.py:safe_flow_q_cfm_budget"
 DATE=$(date +%Y-%m-%d)
 SEEDS=($RANDOM)

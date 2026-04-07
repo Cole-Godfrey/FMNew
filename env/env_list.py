@@ -33,4 +33,14 @@ env_list = [# safety_gymnasium: car
             "OfflineBallRun-v0",                       # 28
             # point_robot
             "PointRobot",                              # 29
+            # safe_metadrive (FISOR)
+            "OfflineMetadrive-easysparse-v0",         # 30
+            "OfflineMetadrive-easymean-v0",           # 31
+            "OfflineMetadrive-easydense-v0",          # 32
+            "OfflineMetadrive-mediumsparse-v0",       # 33
+            "OfflineMetadrive-mediummean-v0",         # 34
+            "OfflineMetadrive-mediumdense-v0",        # 35
+            "OfflineMetadrive-hardsparse-v0",         # 36
+            "OfflineMetadrive-hardmean-v0",           # 37
+            "OfflineMetadrive-harddense-v0",          # 38
             ]

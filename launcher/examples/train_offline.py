@@ -13,8 +13,8 @@ import yaml
 from ml_collections import config_flags, ConfigDict
 import wandb
 from tqdm.auto import trange  # noqa
-import gymnasium as gym
 from env.env_list import env_list
+from env.factory import is_point_robot_env, make_env
 from env.point_robot import PointRobot
 from jaxrl5.wrappers import wrap_gym
 from jaxrl5.agents import (
@@ -54,9 +54,9 @@ def call_main(details):
     details['agent_kwargs']['cost_scale'] = details['dataset_kwargs']['cost_scale']
     wandb.init(project=details['project'], name=details['experiment_name'], group=details['group'], config=details['agent_kwargs'])
 
-    if details['env_name'] == 'PointRobot':
+    if is_point_robot_env(details['env_name']):
         assert details['dataset_kwargs']['pr_data'] is not None, "No data for Point Robot"
-        env = eval(details['env_name'])(id=0, seed=0)
+        env = PointRobot(id=0, seed=0)
         env_max_steps = env._max_episode_steps
         ds = DSRLDataset(
             env,
@@ -66,7 +66,7 @@ def call_main(details):
             balance_seed=details['dataset_kwargs'].get('balance_seed', 0),
         )
     else:
-        env = gym.make(details['env_name'])
+        env = make_env(details['env_name'])
         ds = DSRLDataset(
             env,
             critic_type=details['agent_kwargs']['critic_type'],
@@ -133,13 +133,13 @@ def call_main(details):
         if i > 0 and i % details['eval_interval'] == 0:
             agent.save(f"./results/{details['group']}/{details['experiment_name']}", save_time)
             save_time += 1
-            if details['env_name'] == 'PointRobot':
+            if is_point_robot_env(details['env_name']):
                 eval_info = evaluate_pr(agent, env, details['eval_episodes'])
             elif model_cls == 'SafeFlowQCFMBudget':
                 eval_info = evaluate_budget(agent, env, details['eval_episodes'])
             else:
                 eval_info = evaluate(agent, env, details['eval_episodes'])
-            if details['env_name'] != 'PointRobot':
+            if not is_point_robot_env(details['env_name']):
                 eval_info["normalized_return"], eval_info["normalized_cost"] = env.get_normalized_score(eval_info["return"], eval_info["cost"])
             wandb.log({f"eval/{k}": v for k, v in eval_info.items()}, step=i + pretrain_steps)
 
@@ -153,7 +153,7 @@ def main(_):
     parameters['mode'] = FLAGS.mode
     parameters['load_model'] = FLAGS.load_model
 
-    if parameters['env_name'] == 'PointRobot':
+    if is_point_robot_env(parameters['env_name']):
         parameters['max_steps'] = 100001
         parameters['batch_size'] = 1024
         parameters['eval_interval'] = 25000

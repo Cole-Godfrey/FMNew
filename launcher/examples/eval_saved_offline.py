@@ -9,9 +9,9 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from absl import app, flags
-import gymnasium as gym
 
 from env.env_list import env_list  # noqa: F401 (keep import side effects consistency)
+from env.factory import is_point_robot_env, make_env
 from env.point_robot import PointRobot
 from jaxrl5.agents import (
     SafeDiffusion,
@@ -19,8 +19,9 @@ from jaxrl5.agents import (
     SafeFlowQDiffusion,
     SafeFlowQV2,
     SafeFlowQCFM,
+    SafeFlowQCFMBudget,
 )
-from jaxrl5.evaluation import evaluate, evaluate_pr
+from jaxrl5.evaluation import evaluate, evaluate_pr, evaluate_budget
 from jaxrl5.wrappers import wrap_gym
 
 
@@ -70,12 +71,12 @@ def main(_):
     model_path = _pick_model_file(FLAGS.model_dir, FLAGS.model_file)
 
     env_name = cfg["env_name"]
-    is_point_robot = env_name == "PointRobot"
+    is_point_robot = is_point_robot_env(env_name)
 
     if is_point_robot:
         env = PointRobot(id=0, seed=FLAGS.seed)
     else:
-        env = gym.make(env_name)
+        env = make_env(env_name)
         env_max_steps = getattr(env.spec, "max_episode_steps", None)
         if env_max_steps is None:
             env_max_steps = getattr(env.unwrapped, "_max_episode_steps")
@@ -112,6 +113,8 @@ def main(_):
 
     if is_point_robot:
         eval_info = evaluate_pr(agent, env, FLAGS.eval_episodes)
+    elif model_cls == "SafeFlowQCFMBudget":
+        eval_info = evaluate_budget(agent, env, FLAGS.eval_episodes)
     else:
         eval_info = evaluate(agent, env, FLAGS.eval_episodes)
         if hasattr(env, "get_normalized_score"):
